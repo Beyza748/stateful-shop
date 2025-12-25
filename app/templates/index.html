@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Stateful Shop</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+    <h1>🛒 Stateful Shop</h1>
+    <p>Stateful API + Docker Demo</p>
+</header>
+
+<main>
+    <section>
+        <h2>Ürünler</h2>
+        <div id="products" class="grid"></div>
+    </section>
+
+    <section>
+        <h2>Sepet</h2>
+        <ul id="cart"></ul>
+    </section>
+</main>
+
+<script>
+fetch("/api/products")
+    .then(r => r.json())
+    .then(data => {
+        const div = document.getElementById("products");
+        data.forEach(p => {
+            div.innerHTML += `
+                <div class="card">
+                    <h3>${p.title}</h3>
+                    <p>${p.price} $</p>
+                    <button onclick='addToCart("${p.title}")'>Sepete Ekle</button>
+                </div>
+            `;
+        });
+    });
+
+function addToCart(product) {
+    fetch("/api/cart", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({product})
+    })
+    .then(loadCart);
+}
+
+function loadCart() {
+    fetch("/api/cart")
+        .then(r => r.json())
+        .then(items => {
+            const ul = document.getElementById("cart");
+            ul.innerHTML = "";
+            items.forEach(i => {
+                ul.innerHTML += `<li>${i}</li>`;
+            });
+        });
+}
+
+loadCart();
+</script>
+
+</body>
+</html>
